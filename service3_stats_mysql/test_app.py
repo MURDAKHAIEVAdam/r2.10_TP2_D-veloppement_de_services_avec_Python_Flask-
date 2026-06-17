@@ -39,3 +39,30 @@ def test_describe_missing_parameter(client):
     
     assert response.status_code == 400
     assert data['erreur'] == "Paramètre 'serie' manquant"
+
+def test_correlation_success(client):
+    """Vérifie le succès du calcul de corrélation entre la série A et la série B."""
+    response = client.get('/db/stats/correlation?serie_x=serie_A&serie_y=serie_B')
+    data = response.get_json()
+    
+    assert response.status_code == 200
+    assert data['source'] == 'mysql'
+    assert 'r' in data['resultat']
+    assert 'p_value' in data['resultat']
+    assert 'significatif' in data['resultat']
+
+def test_correlation_missing_param(client):
+    """Vérifie l'erreur 400 s'il manque un des paramètres (ex: serie_y)."""
+    response = client.get('/db/stats/correlation?serie_x=serie_A')
+    data = response.get_json()
+    
+    assert response.status_code == 400
+    assert 'erreur' in data
+
+def test_correlation_not_found(client):
+    """Vérifie l'erreur 404 si l'une des séries demandées n'existe pas."""
+    response = client.get('/db/stats/correlation?serie_x=serie_A&serie_y=serie_introuvable')
+    data = response.get_json()
+    
+    assert response.status_code == 404
+    assert 'erreur' in data
