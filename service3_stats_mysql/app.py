@@ -34,6 +34,7 @@ def db_describe():
 def db_correlation():
     serie_x = request.args.get('serie_x')
     serie_y = request.args.get('serie_y')
+    print(f"{serie_x}, {serie_y}")
     
     if not serie_x or not serie_y:
         return jsonify({'erreur': 'Paramètres serie_x et serie_y requis'}), 400
@@ -41,6 +42,7 @@ def db_correlation():
     try:
         x = np.array(fetch_series(serie_x))
         y = np.array(fetch_series(serie_y))
+        print(f"{x}, {y}")
 
         n = min(len(x), len(y))
         x, y = x[:n], y[:n]
