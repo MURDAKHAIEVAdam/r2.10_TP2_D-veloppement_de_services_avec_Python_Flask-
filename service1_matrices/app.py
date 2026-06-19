@@ -1,6 +1,10 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 import numpy as np
 app = Flask(__name__)
+
+@app.route('/', methods=['GET'])
+def tester_service():
+    return send_from_directory(app.root_path, 'tester.html')
 
 def parse_matrix(data,key):
     try:

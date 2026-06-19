@@ -1,9 +1,13 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import numpy as np
 from scipy import stats
 from db import fetch_series
 
 app = Flask(__name__)
+
+@app.route('/', methods=['GET'])
+def tester_service():
+    return send_from_directory(app.root_path, 'tester.html')
 
 @app.route('/db/stats/describe', methods=['GET'])
 def db_describe():
