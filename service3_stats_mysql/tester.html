@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test du service statistiques MySQL</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --text: #17202a;
+      --muted: #5f6c7b;
+      --line: #d8dee6;
+      --primary: #1266d6;
+      --primary-dark: #0d4fa8;
+      --ok: #147d3f;
+      --error: #b3261e;
+      --code: #111827;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 24px auto;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: end;
+      padding: 16px;
+      margin-bottom: 18px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      min-width: min(420px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font: inherit;
+      background: #fff;
+      color: var(--text);
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      padding: 11px 14px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+    }
+
+    button.secondary {
+      background: #eef3f8;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    button.secondary:hover {
+      background: #e1e8f0;
+    }
+
+    .routes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+      gap: 16px;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .route-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h2 {
+      margin: 0 0 4px;
+      font-size: 18px;
+    }
+
+    code {
+      color: var(--primary-dark);
+      font-family: Consolas, Monaco, monospace;
+      font-size: 13px;
+    }
+
+    .route-body {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .params {
+      display: grid;
+      gap: 12px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    pre {
+      min-height: 96px;
+      margin: 0;
+      padding: 12px;
+      overflow: auto;
+      border-radius: 6px;
+      background: var(--code);
+      color: #e5e7eb;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+    }
+
+    .status {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status.ok {
+      color: var(--ok);
+    }
+
+    .status.error {
+      color: var(--error);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Test du service statistiques MySQL</h1>
+    <p>Page de test des routes Flask définies dans <code>service3_stats_mysql/app.py</code>.</p>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <label>
+        URL du service
+        <input id="base-url" value="" placeholder="http://localhost:5003">
+      </label>
+      <button id="run-all">Tester toutes les routes</button>
+      <button id="reset" class="secondary">Réinitialiser les exemples</button>
+    </div>
+
+    <div id="routes" class="routes"></div>
+  </main>
+
+  <script>
+    const examples = [
+      {
+        title: 'Description série A',
+        method: 'GET',
+        path: '/db/stats/describe',
+        params: {
+          serie: 'serie_A'
+        }
+      },
+      {
+        title: 'Description série B',
+        method: 'GET',
+        path: '/db/stats/describe',
+        params: {
+          serie: 'serie_B'
+        }
+      },
+      {
+        title: 'Corrélation A / B',
+        method: 'GET',
+        path: '/db/stats/correlation',
+        params: {
+          serie_x: 'serie_A',
+          serie_y: 'serie_B'
+        }
+      },
+      {
+        title: 'Série inexistante',
+        method: 'GET',
+        path: '/db/stats/describe',
+        params: {
+          serie: 'serie_Inexistante'
+        }
+      },
+      {
+        title: 'Paramètre manquant',
+        method: 'GET',
+        path: '/db/stats/correlation',
+        params: {
+          serie_x: 'serie_A',
+          serie_y: ''
+        }
+      }
+    ];
+
+    const routeContainer = document.querySelector('#routes');
+    const baseUrlInput = document.querySelector('#base-url');
+
+    function initialBaseUrl() {
+      if (location.protocol === 'http:' || location.protocol === 'https:') {
+        return location.origin;
+      }
+      return 'http://localhost:5003';
+    }
+
+    function formatJson(value) {
+      return JSON.stringify(value, null, 2);
+    }
+
+    function resetExamples() {
+      examples.forEach((route, index) => {
+        Object.entries(route.params).forEach(([name, value]) => {
+          document.querySelector(`[data-param="${index}:${name}"]`).value = value;
+        });
+      });
+      document.querySelectorAll('[data-result]').forEach((result) => {
+        result.textContent = 'Aucun test lancé.';
+      });
+      document.querySelectorAll('[data-status]').forEach((status) => {
+        status.textContent = '';
+        status.className = 'status';
+      });
+    }
+
+    function renderParamInputs(route, index) {
+      return Object.entries(route.params).map(([name, value]) => `
+        <label>
+          ${name}
+          <input data-param="${index}:${name}" value="${value}">
+        </label>
+      `).join('');
+    }
+
+    function renderRoutes() {
+      routeContainer.innerHTML = examples.map((route, index) => `
+        <section>
+          <div class="route-head">
+            <div>
+              <h2>${route.title}</h2>
+              <code>${route.method} ${route.path}</code>
+            </div>
+            <span class="status" data-status="${index}"></span>
+          </div>
+          <div class="route-body">
+            <div class="params">
+              ${renderParamInputs(route, index)}
+            </div>
+            <div class="actions">
+              <button data-test="${index}">Tester cette route</button>
+              <button class="secondary" data-copy="${index}">Copier l'URL</button>
+            </div>
+            <pre data-result="${index}">Aucun test lancé.</pre>
+          </div>
+        </section>
+      `).join('');
+    }
+
+    function serviceUrl(route, index) {
+      const base = baseUrlInput.value.trim().replace(/\/$/, '');
+      const url = new URL(`${base}${route.path}`);
+
+      Object.keys(route.params).forEach((name) => {
+        const value = document.querySelector(`[data-param="${index}:${name}"]`).value.trim();
+        if (value !== '') {
+          url.searchParams.set(name, value);
+        }
+      });
+
+      return url.toString();
+    }
+
+    async function testRoute(index) {
+      const route = examples[index];
+      const result = document.querySelector(`[data-result="${index}"]`);
+      const status = document.querySelector(`[data-status="${index}"]`);
+
+      status.textContent = 'En cours';
+      status.className = 'status';
+      result.textContent = '';
+
+      try {
+        const response = await fetch(serviceUrl(route, index), {
+          method: route.method
+        });
+        const contentType = response.headers.get('content-type') || '';
+        const data = contentType.includes('application/json')
+          ? await response.json()
+          : await response.text();
+
+        status.textContent = `${response.status} ${response.statusText || ''}`.trim();
+        status.className = response.ok ? 'status ok' : 'status error';
+        result.textContent = typeof data === 'string' ? data : formatJson(data);
+      } catch (error) {
+        status.textContent = 'Erreur réseau';
+        status.className = 'status error';
+        result.textContent = [
+          error.message,
+          '',
+          'Vérifiez que le service Flask est lancé sur le port 5003 et que MySQL est accessible avec le fichier .env.'
+        ].join('\n');
+      }
+    }
+
+    routeContainer.addEventListener('click', async (event) => {
+      const testButton = event.target.closest('[data-test]');
+      const copyButton = event.target.closest('[data-copy]');
+
+      if (testButton) {
+        await testRoute(Number(testButton.dataset.test));
+      }
+
+      if (copyButton) {
+        const index = Number(copyButton.dataset.copy);
+        await navigator.clipboard.writeText(serviceUrl(examples[index], index));
+      }
+    });
+
+    document.querySelector('#run-all').addEventListener('click', async () => {
+      for (let index = 0; index < examples.length; index += 1) {
+        await testRoute(index);
+      }
+    });
+
+    document.querySelector('#reset').addEventListener('click', resetExamples);
+
+    baseUrlInput.value = initialBaseUrl();
+    renderRoutes();
+  </script>
+</body>
+</html>
