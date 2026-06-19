@@ -105,6 +105,17 @@ curl.exe -X GET "http://localhost:5003/db/stats/correlation?serie_x=serie_A&seri
 - `200 OK` : Succès.
 - `400 Bad Request` si l'un des deux paramètres (ou les deux) est manquant.
 - `404 Not Found` si l'une des séries est introuvable en base.
+## Page de test (HTML/CSS)
+ 
+Une page de test statique (HTML/CSS/JS) est disponible pour interroger les routes sans passer par cURL ou Postman. Une fois le serveur Flask lancé (`python app.py`), ouvrez le fichier de test dans votre navigateur, puis renseignez l'URL du service (par défaut `http://localhost:5003`) dans le champ prévu.
+ 
+Cette page permet de :
+ 
+- Tester chaque route individuellement (`describe` et `correlation`) via des boutons dédiés.
+- Modifier les paramètres (`serie`, `serie_x`, `serie_y`) directement dans les champs de saisie.
+- Lancer tous les exemples en une seule fois avec le bouton **Tester toutes les routes**.
+- Copier l'URL générée pour chaque requête.
+- Visualiser le code de statut HTTP et la réponse JSON brute pour chaque test.
 ## Exécution des Tests Unitaires
  
 Pour lancer la suite de tests automatisés et vérifier la robustesse des routes :
