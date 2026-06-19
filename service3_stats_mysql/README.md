@@ -34,25 +34,32 @@ Calcule les statistiques descriptives d'une série spécifiée (moyenne, médian
 GET http://localhost:5003/db/stats/describe?serie=serie_A
 ```
  
+**Commande de test (cURL Windows/PowerShell) :**
+ 
+```bash
+curl.exe -X GET "http://localhost:5003/db/stats/describe?serie=serie_A"
+```
+ 
 **Réponse (200 OK) :**
  
 ```json
 {
-  "source": "mysql",
-  "resultat": {
-    "serie": "serie_A",
-    "n": 5,
-    "moyenne": 14.14,
-    "mediane": 13.2,
-    "ecart_type": 4.5159,
-    "minimum": 8.7,
-    "maximum": 21.0
-  }
+    "resultat": {
+        "ecart_type": 4.5159,
+        "maximum": 21.0,
+        "mediane": 13.2,
+        "minimum": 8.7,
+        "moyenne": 14.14,
+        "n": 5,
+        "serie": "serie_A"
+    },
+    "source": "mysql"
 }
 ```
  
-**Erreurs possibles :**
+**Codes de statut :**
  
+- `200 OK` : Succès.
 - `400 Bad Request` si le paramètre `serie` est manquant.
 - `404 Not Found` si la série n'existe pas dans la base de données.
 ### GET /db/stats/correlation
@@ -69,26 +76,33 @@ Calcule le coefficient de corrélation de Pearson et la p-value entre deux séri
 GET http://localhost:5003/db/stats/correlation?serie_x=serie_A&serie_y=serie_B
 ```
  
+**Commande de test (cURL Windows/PowerShell) :**
+ 
+```bash
+curl.exe -X GET "http://localhost:5003/db/stats/correlation?serie_x=serie_A&serie_y=serie_B"
+```
+ 
 **Réponse (200 OK) :**
  
 ```json
 {
-  "source": "mysql",
-  "series": {
-    "x": "serie_A",
-    "y": "serie_B",
-    "n_points": 5
-  },
-  "resultat": {
-    "r": 0.8742,
-    "p_value": 0.0526,
-    "significatif": false
-  }
+    "resultat": {
+        "p_value": 0.221189,
+        "r": 0.7788,
+        "significatif": false
+    },
+    "series": {
+        "n_points": 4,
+        "x": "serie_A",
+        "y": "serie_B"
+    },
+    "source": "mysql"
 }
 ```
  
-**Erreurs possibles :**
+**Codes de statut :**
  
+- `200 OK` : Succès.
 - `400 Bad Request` si l'un des deux paramètres (ou les deux) est manquant.
 - `404 Not Found` si l'une des séries est introuvable en base.
 ## Exécution des Tests Unitaires
